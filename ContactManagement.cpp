@@ -19,20 +19,6 @@ struct Contact {
 vector<Contact> contacts;
 const string FILE_NAME = "Contacts.Save";
 
-// Function to check if the entered username and password are correct
-bool authenticateUser(const string& username, const string& password) {
-    ifstream file("users.txt");
-    string storedUsername, storedPassword;
-    while (file >> storedUsername >> storedPassword) {
-        if (username == storedUsername && password == storedPassword) {
-            file.close();
-            return true;
-        }
-    }
-    file.close();
-    return false;
-}
-
 // Save contacts to file
 void saveContacts(const string& filename = FILE_NAME) {
     ofstream file("Contacts.Save");
@@ -44,7 +30,7 @@ void saveContacts(const string& filename = FILE_NAME) {
         file.close();
         cout << "Contacts saved successfully.\n";
     } else {
-        cerr << "Error: Unable to save contacts to file.\n";
+        cout << "Unable to save contacts to file.\n";
     }
 }
 
@@ -78,12 +64,13 @@ void loadContacts(const string& filename = FILE_NAME) {
         file.close();
         cout << "Contacts loaded successfully.\n";
     } else {
-        cerr << "Error: Unable to load contacts from file.\n";
+        cout << "Unable to load contacts from file.\n";
     }
 }
 
 // Function to add a new contact
 void addContact() {
+	cout << "Please press enter for furtur process." << endl;
     cin.ignore();
     Contact newContact;
     cout << "Enter name: ";
@@ -118,6 +105,56 @@ void viewContacts() {
         cout << "Birthday: " << contacts[i].birthday << endl;
     }
 }
+//Fuction to edit contacts
+void editContacts(const string& name) {
+    bool found = false;
+    for (int i = 0; i < contacts.size(); ++i) {
+        if (contacts[i].name == name) {
+            Contact& contact = contacts[i]; // Get reference to the contact to modify
+            cout << "Enter new phone number: ";
+            getline(cin, contact.phoneNumber);
+            cout << "Enter new email address: ";
+            getline(cin, contact.emailAddress);
+            cout << "Enter new notes: ";
+            getline(cin, contact.notes);
+            cout << "Enter new group: ";
+            getline(cin, contact.group);
+            cout << "Enter new birthday (DD/MM/YYYY): ";
+            getline(cin, contact.birthday);
+            cout << "Contact updated successfully.\n";
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "Contact not found" << endl;
+    }
+}
+
+// Function to search contacts by name
+void searchContactsByName() {
+    string searchName;
+    cout << "Enter the name to search: ";
+    getline(cin, searchName);
+    
+    bool found = false;
+    for (size_t i = 0; i < contacts.size(); ++i) {
+        if (contacts[i].name.find(searchName) != -1) {
+            const Contact& contact = contacts[i];
+            cout << "Name: " << contact.name << endl;
+            cout << "Phone Number: " << contact.phoneNumber << endl;
+            cout << "Email Address: " << contact.emailAddress << endl;
+            cout << "Notes: " << contact.notes << endl;
+            cout << "Group: " << contact.group << endl;
+            cout << "Birthday: " << contact.birthday << endl;
+            cout << "---------------------------" << endl;
+            found = true;
+        }
+    }
+    if (!found) {
+        cout << "Contact not found.\n";
+    }
+}
 
 // Function to delete a contact
 void deleteContacts(const string& name) {
@@ -137,6 +174,26 @@ void deleteContacts(const string& name) {
     }
 }
 
+//Function to veiw contacts by group
+void viewContactsByGroup(const string& group) {
+    if (contacts.empty()) {
+        cout << "No contacts found." << endl;
+        return;
+    }
+    cout << "Contacts in Group '" << group << "':" << endl;
+   	for (size_t i = 0; i < contacts.size(); ++i) {
+    	const Contact& contact = contacts[i];
+    	if (contact.group == group) {
+            cout << "Name: " << contact.name << endl;
+            cout << "Phone Number: " << contact.phoneNumber << endl;
+            cout << "Email Address: " << contact.emailAddress << endl;
+            cout << "Notes: " << contact.notes << endl;
+            cout << "Birthday: " << contact.birthday << endl;
+            cout << "---------------------------" << endl;
+        }
+    }
+}
+
 // Function to export contacts to a CSV file
 void exportContacts(const string& filename = FILE_NAME) {
     ofstream file("Contacts.Save");
@@ -149,7 +206,7 @@ void exportContacts(const string& filename = FILE_NAME) {
         file.close();
         cout << "Contacts exported to CSV file successfully.\n";
     } else {
-        cerr << "Error: Unable to export contacts to CSV file.\n";
+        cout << "Unable to export contacts to CSV file.\n";
     }
 }
 
@@ -157,7 +214,7 @@ void exportContacts(const string& filename = FILE_NAME) {
 void importContacts() {
     ifstream file("Contacts.csv");
     if (!file) {
-        cerr << "Error: Unable to open file.\n"; 
+        cout << "Unable to open file.\n"; 
         return;
     }
 
@@ -200,103 +257,77 @@ void displayBirthdayReminders() {
 
 int main() {
     int choice;
-    bool authenticated = false; // Flag to track user authentication
-
-    cout << "Contact Management System\n";
-    cout << "1. Save Contacts\n";
-    cout << "2. Authenticate User\n";
-    cout << "Enter your choice: ";
-    cin >> choice;
-    cin.ignore(); 
-    cout << "-------------------" << endl;
-    cout << "Please press Enter for futhur process: ";
-
-    if (choice == 1) {
-        addContact(); 
-        saveContacts(); 
-    } else if (choice == 2) {
-        string username, password;
-
-        cout << "\nLogin\n";
-        cout << "Username: ";
-        cin >> username;
-        cout << "Password: ";
-        cin >> password;
-
-        authenticated = authenticateUser(username, password);
-
-        if (authenticated) {
-            cout << "Authentication successful. Welcome, " << username << "!\n";
-        } else {
-            cout << "Authentication failed. Exiting program.\n";
-            return 0;
-        }
-    } else {
-        cout << "Invalid choice.\n";
-        return 0; 
-    }
+    string name;
 
     do {
         cout << "\nContact Management System\n";
+        cout << "---------------------------\n";
         cout << "1. Add Contact\n";
         cout << "2. View Contacts\n";
-        cout << "3. Delete Contact\n";
-        cout << "4. Export Contacts\n";
-        cout << "5. Import Contacts\n";
-        cout << "6. View Birthday Reminders\n";
-        cout << "7. Exit\n";
+        cout << "3. Edit Contact\n";
+        cout << "4. Delete Contact\n";
+        cout << "5. Export Contacts\n";
+        cout << "6. Import Contacts\n";
+        cout << "7. View Contacts by Group\n";
+        cout << "8. Search Contacts by Name\n";
+        cout << "9. View Birthday Reminders\n";
+        cout << "10. Exit\n";
+        cout << "----------------------------\n";
         cout << "Enter your choice: ";
         cin >> choice;
         cin.ignore(); // Clear the newline character from the input buffer
 
         switch (choice) {
             case 1:
-                if (authenticated) {
-                    addContact();
-                } else {
-                    cout << "Please authenticate first.\n";
-                }
+                addContact();
                 break;
             case 2:
                 viewContacts();
                 break;
-            case 3:
-    			{
-        		string name;
-        		cout << "Enter the name of the contact to delete: ";
-        		getline(cin, name);
-        		deleteContacts(name);
-    			}
+           case 3:
+    			cout << "Enter the name of the contact to edit: ";
+    			getline(cin, name);
+    			editContacts(name);
     			break;
             case 4:
-                if (authenticated) {
-                    exportContacts();
-                } else {
-                    cout << "Please authenticate first.\n";
+                {
+                string name;
+				cout << "Enter the name of the contact to delete: ";
+                getline(cin, name);
+                deleteContacts(name);
                 }
                 break;
             case 5:
-                if (authenticated) {
-                    importContacts();
-                } else {
-                    cout << "Please authenticate first.\n";
-                    }
+                exportContacts();
                 break;
             case 6:
-                displayBirthdayReminders();
+                importContacts();
                 break;
             case 7:
-                if (authenticated) {
-                    saveContacts(); // Save contacts before exiting
+                {
+                string group;
+                cout << "Enter the group name: ";
+                getline(cin, group);
+                viewContactsByGroup(group);
                 }
-                cout << "Exiting program.\n";
+                break;
+            case 8:
+                searchContactsByName();
+                break;
+            case 9:
+                displayBirthdayReminders();
+                break;
+            case 10:
+                saveContacts(); // Save contacts before exiting
                 break;
             default:
                 cout << "Invalid choice. Please try again.\n";
         }
-    } while (choice != 7);
+    } while (choice != 10);
 
     return 0;
 }
+
+
 
 
