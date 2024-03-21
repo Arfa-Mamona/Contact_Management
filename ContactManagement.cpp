@@ -1,13 +1,11 @@
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <vector>
-#include <map>
+#include <string>
 #include <iomanip>
-#include <sstream>
-#include <cstdlib>
-#include <ctime>
-#include <windows.h>
+#include <algorithm>
+#include <map>
+
 
 using namespace std;
 
@@ -23,69 +21,34 @@ struct Contact {
 vector<Contact> contacts;
 const string FILE_NAME = "Contacts.Save";
 
-// Define a map to store usernames and hashed passwords
+// Define a map to store usernames and passwords
 map<string, string> users;
-
-// Function to generate hash
-string generateHash(const string& password, const string& salt) {
-    // Hashing algorithm implementation
-    return password + salt; // For simplicity, just concatenate password and salt
-}
 
 // Function to initialize users with hardcoded usernames and passwords
 void initializeUsers() {
     // You can replace these with your desired usernames and passwords
-    users["user1"] = generateHash("password1", "salt1");
-    users["user2"] = generateHash("password2", "salt2");
-}
-
-// Function to save usernames and passwords to a file
-void saveUsersToFile() {
-    ofstream userFile("users.txt");
-    if (userFile.is_open()) {
-        for (map<string, string>::iterator it = users.begin(); it != users.end(); ++it) {
-            userFile << it->first << " " << it->second << endl;
-        }
-        userFile.close();
-        cout << "Usernames and passwords saved successfully.\n";
-    } else {
-        cout << "Unable to save usernames and passwords to file.\n";
-    }
-}
-
-// Function to load usernames and passwords from a file
-void loadUsersFromFile() {
-    ifstream userFile("users.txt");
-    if (userFile.is_open()) {
-        users.clear();
-        string username, password;
-        while (userFile >> username >> password) {
-            users[username] = password;
-        }
-        userFile.close();
-        cout << "Usernames and passwords loaded successfully.\n";
-    } else {
-        cout << "Unable to load usernames and passwords from file.\n";
-    }
+    users["user1"] = "password1";
+    users["user2"] = "password2";
 }
 
 // Function to authenticate the user
 bool authenticateUser() {
     string username, password;
+
+// Get username and password from the user
     cout << "Enter username: ";
     cin >> username;
     cout << "Enter password: ";
     cin >> password;
-    cin.ignore(); // Clear the newline character from the input buffer
 
-    if (users.find(username) != users.end()) {
-        return users[username] == generateHash(password, "salt"); // Use a common salt for simplicity
+// Check if the entered username exists and the password matches
+    if (users.find(username) != users.end() && users[username] == password) {
+        cout << "Authentication successful.\n";
+        return true;
+    } else {
+        cout << "Invalid username or password. Authentication failed.\n";
+        return false;
     }
-    return false;
-}
-
-// Function to clear the console screen
-void clearScreen() {
 }
 
 
@@ -289,63 +252,47 @@ void exportContacts(const string& filename = FILE_NAME) {
     }
 }
 
+
 // Function to import contacts From CSV files
 void importContacts() {
+    // Authenticate the user before importing contacts
+    if (!authenticateUser()) {
+        cout << "Authentication failed. Contacts not imported.\n";
+        return;
+    }
+    
     ifstream file("Contacts.csv");
     if (!file) {
         cout << "Unable to open file.\n"; 
         return;
-    }else{
-	
-    if (users.empty()) {
-        string newUsername, newPassword;
-        cout << "No usernames and passwords found. Set up a username and password.\n";
-        cout << "Enter username: ";
-        cin >> newUsername;
-        cout << "Enter password: ";
-        cin >> newPassword;
-        users[newUsername] = newPassword;
-        cout << "Username and password set up successfully.\n";
     }
+
+    string name, phoneNumber, emailAddress, notes, group, birthday;
+    getline(file, name);
+    while (getline(file, name, ',')) { 
+        getline(file, phoneNumber, ','); 
+        getline(file, emailAddress, ','); 
+        getline(file, notes, ','); 
+        getline(file, group, ','); 
+        getline(file, birthday);
+
+        Contact newContact; 
+        newContact.name = name; 
+        newContact.phoneNumber = phoneNumber; 
+        newContact.emailAddress = emailAddress; 
+        newContact.notes = notes; 
+        newContact.group = group; 
+        newContact.birthday = birthday; 
+        
+        contacts.push_back(newContact);
+    }
+
+    file.close(); 
+
+    cout << "Contacts imported successfully.\n"; 
 }
-    string username, password;
-    cout << "Enter username: ";
-    cin >> username;
-    cout << "Enter password: ";
-    cin >> password;
 
-    if (users.find(username) != users.end() && users[username] == password) {
-        cout << "Authentication successful. Contacts imported.\n";
-        // Proceed with importing contacts
-    } else {
-        cout << "Invalid username or password. Authentication failed. Contacts not imported.\n";
-    }
 
-        string name, phoneNumber, emailAddress, notes, group, birthday;
-        getline(file, name);
-        while (getline(file, name, ',')) { 
-            getline(file, phoneNumber, ','); 
-            getline(file, emailAddress, ','); 
-            getline(file, notes, ','); 
-            getline(file, group, ','); 
-            getline(file, birthday);
-
-            Contact newContact; 
-            newContact.name = name; 
-            newContact.phoneNumber = phoneNumber; 
-            newContact.emailAddress = emailAddress; 
-            newContact.notes = notes; 
-            newContact.group = group; 
-            newContact.birthday = birthday; 
-            
-            contacts.push_back(newContact);
-        }
-
-        file.close(); 
-
-        cout << "Contacts imported successfully.\n"; 
-    }
-    
 
 // Function to display bday reminders
 void displayBirthdayReminders() {
@@ -428,7 +375,7 @@ int main() {
                 displayBirthdayReminders();
                 break;
             case 11:
-                cout <<"Exiting Program";
+                cout << "Exiting Program." << endl;
                 break;
             default:
                 cout << "Invalid choice. Please try again.\n";
