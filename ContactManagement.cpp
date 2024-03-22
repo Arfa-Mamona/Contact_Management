@@ -31,25 +31,47 @@ void initializeUsers() {
     users["user2"] = "password2";
 }
 
-// Function to authenticate the user
+// Function to authenticate the user or create a new account
 bool authenticateUser() {
     string username, password;
+    char choice;
+    bool newUser = false;
 
-// Get username and password from the user
-    cout << "Enter username: ";
-    cin >> username;
-    cout << "Enter password: ";
-    cin >> password;
+    cout << "Do you have an existing account? (y/n): ";
+    cin >> choice;
 
-// Check if the entered username exists and the password matches
+    if (choice == 'n' || choice == 'N') {
+        cin.ignore();
+        cout << "Create a new account:\n";
+        cout << "Enter a username: ";
+        cin.ignore();
+        getline(cin, username);
+        cout << "Enter a password: ";
+        cin >> password;
+        
+        users[username] = password; 
+        newUser = true;
+    } else {
+        cout << "Enter username: ";
+        cin >> username;
+        cout << "Enter password: ";
+        cin >> password;
+    }
+
+    // Authenticate the user
     if (users.find(username) != users.end() && users[username] == password) {
-        cout << "Authentication successful.\n";
+        if (newUser) {
+            cout << "Account created successfully.\n";
+        } else {
+            cout << "Authentication successful.\n";
+        }
         return true;
     } else {
-        cout << "Invalid username or password. Authentication failed.\n";
+        cout << "Invalid username or password.\n";
         return false;
     }
 }
+
 
 
 // Save contacts to file
