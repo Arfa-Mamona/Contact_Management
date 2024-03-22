@@ -21,17 +21,15 @@ struct Contact {
 vector<Contact> contacts;
 const string FILE_NAME = "Contacts.Save";
 
-// Define a map to store usernames and passwords
 map<string, string> users;
 
-// Function to initialize users with hardcoded usernames and passwords
+// Function to initialize users 
 void initializeUsers() {
-    // You can replace these with your desired usernames and passwords
     users["user1"] = "password1";
     users["user2"] = "password2";
 }
 
-// Function to authenticate the user or create a new account
+// Function to authenticate the user or create new
 bool authenticateUser() {
     string username, password;
     char choice;
@@ -53,9 +51,11 @@ bool authenticateUser() {
         newUser = true;
     } else {
         cout << "Enter username: ";
-        cin >> username;
+        getline(cin, username);
+        cin.ignore();
         cout << "Enter password: ";
-        cin >> password;
+        getline(cin, password);
+        cin.ignore();
     }
 
     // Authenticate the user
@@ -170,7 +170,7 @@ void editContacts(const string& name) {
     bool found = false;
     for (int i = 0; i < contacts.size(); ++i) {
         if (contacts[i].name == name) {
-            Contact& contact = contacts[i]; // Get reference to the contact to modify
+            Contact& contact = contacts[i]; 
             cout << "Enter new phone number: ";
             getline(cin, contact.phoneNumber);
             cout << "Enter new email address: ";
@@ -258,7 +258,7 @@ void viewContactsByGroup(const string& group) {
 }
 
 
-// Function to export contacts to a CSV file
+// Function to export contacts 
 void exportContacts(const string& filename = FILE_NAME) {
     ofstream file("Contacts.Save");
     if (file.is_open()) {
@@ -268,22 +268,22 @@ void exportContacts(const string& filename = FILE_NAME) {
     file << contact.name << "," << contact.phoneNumber << "," << contact.emailAddress << "," << contact.notes << "," << contact.group << "," << contact.birthday << endl;
 }
         file.close();
-        cout << "Contacts exported to CSV file successfully.\n";
+        cout << "Contacts exported to file successfully.\n";
     } else {
-        cout << "Unable to export contacts to CSV file.\n";
+        cout << "Unable to export contacts to file.\n";
     }
 }
 
 
-// Function to import contacts From CSV files
+// Function to import contacts 
 void importContacts() {
-    // Authenticate the user before importing contacts
+    // Authentication
     if (!authenticateUser()) {
         cout << "Authentication failed. Contacts not imported.\n";
         return;
     }
     
-    ifstream file("Contacts.csv");
+    ifstream file("Contacts.Save");
     if (!file) {
         cout << "Unable to open file.\n"; 
         return;
@@ -331,7 +331,6 @@ int main() {
     int choice;
     string name;
 
-    // Initialize users
     initializeUsers();
     
     do {
@@ -351,7 +350,7 @@ int main() {
         cout << "----------------------------\n";
         cout << "Enter your choice: ";
         cin >> choice;
-        cin.ignore(); // Clear the newline character from the input buffer
+        cin.ignore(); 
 
         switch (choice) {
             case 1:
